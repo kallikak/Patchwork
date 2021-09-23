@@ -36,7 +36,7 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
   - Switch 1 enables or disables the central harmony note
   - Switch 2 enables or disables the outer harmony notes
   - Switch 3 enables or disables fast play (by controlling how quickly the system responds to joystick movement)
-  - Switch 4 switches between fast or slow note changes. When slow, a moving average is use to smooth the notes changes.
+  - Switch 4 switches between a fast or slow relaxation time for note changes. When slow, a longer moving average is use for smoothing.
 
 ## Schematic
 
