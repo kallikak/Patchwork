@@ -13,6 +13,7 @@ Here is a <a href="Thumb Blues Improvisation.mp4" alt="Video demo">brief video</
 
 
 ## Basic use
+
 Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to start playing.  Moving the joystick along one axis plays a single note, while moving along the other axis plays a chord made up of a central note plus a 5th down and a sixth up.
 
 ## Controls
@@ -36,3 +37,9 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
   - Switch 2 enables or disables the outer harmony notes
   - Switch 3 enables or disables fast play (by controlling how quickly the system responds to joystick movement)
   - Switch 4 switches between fast or slow note changes. When slow, a moving average is use to smooth the notes changes.
+
+## Schematic
+
+The circuit will work with Arduino Uno or Nano, and can very easily be adapted for Teensy and others.
+
+<img src="Patchwork_Schematic.pdf" alt="The schematic">
