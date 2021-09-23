@@ -13,7 +13,7 @@ Here is a <a href="Thumb Blues Improvisation.mp4" alt="Video demo">brief video</
 
 ## Basic use
 
-Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to start playing.  Moving the joystick along one axis plays a single note, while moving along the other axis plays a chord made up of a central note plus a 5th down and a sixth up.
+Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to start playing.  Moving the joystick along the x-axis plays a single note with pitch determined by the x position. Moving along the y-axis plays a chord made up of a central note with pitch determined by the y position, plus two additional notes - a 5th down and a sixth up.
 
 ## Controls
 
@@ -26,7 +26,7 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
   - Pentatonic major
   - Pentatonic minor 
   - Blues
-- The first 6 Neopixel LEDs indicate the active quantisation.
+- The first 6 Neopixel LEDs indicate the active quantisation. (The other two just flash random colours when new notes are played.)
 - Holding the joystick button down while moving will prevent new notes being sent.
 - The encoder allows transposition of the output notes:
   - Rotate to choose a transposition interval
@@ -40,6 +40,6 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
 
 ## Schematic
 
-The circuit will work with Arduino Uno or Nano, and can very easily be adapted for Teensy and others.
+The circuit will work with Arduino Uno or Nano, and is easily adapted for Teensy and others.
 
 <a href="Patchwork_Schematic.pdf"><img src="Patchwork_Schematic.png" alt="The schematic"></a>
