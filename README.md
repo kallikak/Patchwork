@@ -2,6 +2,16 @@
 Joystick MIDI controller inspired by Laurie Spiegel's Music Mouse, and named after the first piece on her album "The Expanding Universe".
 (The name is also appropriate because this project was thrown together using bits and pieces from my junk box.)
 
+<table>
+  <tr>
+    <td><img src="Patchwork_Top.jpg" alt="The module" height="280px"></td>
+    <td><img src="Patchwork_Bottom.jpg" alt="The module" height="280px"></td>
+  </tr>  
+</table>
+
+Here is a <a href="Thumb Blues Improvisation.mp4" alt="Video demo">brief video</a> showing it in action.
+
+
 ## Basic use
 Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to start playing.  Moving the joystick along one axis plays a single note, while moving along the other axis plays a chord made up of a central note plus a 5th down and a sixth up.
 
