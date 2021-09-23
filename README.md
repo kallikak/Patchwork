@@ -11,7 +11,6 @@ Joystick MIDI controller inspired by Laurie Spiegel's Music Mouse, and named aft
 
 Here is a <a href="Thumb Blues Improvisation.mp4" alt="Video demo">brief video</a> showing it in action.
 
-
 ## Basic use
 
 Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to start playing.  Moving the joystick along one axis plays a single note, while moving along the other axis plays a chord made up of a central note plus a 5th down and a sixth up.
@@ -28,6 +27,7 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
   - Pentatonic minor 
   - Blues
 - The first 6 Neopixel LEDs indicate the active quantisation.
+- Holding the joystick button down while moving will prevent new notes being sent.
 - The encoder allows transposition of the output notes:
   - Rotate to choose a transposition interval
   - Click to apply the chosen transposition
