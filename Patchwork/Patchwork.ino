@@ -283,7 +283,7 @@ void checkDIPswitches()
   if (dipsw[2].risingEdge())
     slowplay = false; 
 
-  // switch 4 toggles fast/slow play
+  // switch 4 toggles fast/slow decay
   if (dipsw[3].fallingEdge())
     slowdecay = true;
   if (dipsw[3].risingEdge())
