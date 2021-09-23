@@ -42,4 +42,4 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
 
 The circuit will work with Arduino Uno or Nano, and can very easily be adapted for Teensy and others.
 
-<img src="Patchwork_Schematic.pdf" alt="The schematic">
+<a href="Patchwork_Schematic.png"><img src="Patchwork_Schematic.pdf" alt="The schematic"></a>
