@@ -35,7 +35,6 @@ const int DIP_PIN[] = {6, 5, 4, 3};
 #define MELODY_VELOCITY 100
 #define CHORD_VELOCITY 70
 
-
 #define FASTSTEP 40
 #define SLOWSTEP 120
 #define FASTDECAY 3
@@ -108,10 +107,8 @@ int quantise(int n, tuning t, bool applytranspose)
   // pentatonic_m: 0 3 5 7 10
   // blues:        0 3 5 6 7 10
 
-  if (applytranspose)
-    n += transpose;
   if (t == CHROMATIC)
-    return n;
+    return applytranspose ? transpose + n : n;
 
   int k = (144 + n + 8) % 12;   
   if (t == DIATONIC_MAJOR)
@@ -168,7 +165,7 @@ int quantise(int n, tuning t, bool applytranspose)
     }
   }
 
-  return n;
+  return applytranspose ? n + transpose : n;
 }
 
 int smoothpot(int newvalue, int curvalue, int n)
@@ -179,7 +176,7 @@ int smoothpot(int newvalue, int curvalue, int n)
 void showTranspose(int d)
 {
   bool down = d < 0;
-  d = quantise(abs(d), scale, false);
+  d = abs(d);
   for (int i = 0; i < SCALEPIXELS; ++i)
   {
     int j = 2 * i + 1;
@@ -222,7 +219,7 @@ void checkEncoder()
     showTranspose(encpos / 4);
     resettoshowscale = millis() + 1000;
 #if DEBUG
-    DBGn(encpos)MSGn(" -> ")MSG(quantise(encpos / 4, scale, false))
+    DBGn(encpos)MSGn(" -> ")MSG(encpos / 4)
 #endif    
   }
   encoder.write(newpos);
@@ -246,7 +243,7 @@ void checkEncoder()
   {
     if (!enclongpress)
     {
-      transpose = quantise(encpos / 4, scale, false);
+      transpose = encpos / 4;
 #if DEBUG
       DBG(transpose);
 #endif    
