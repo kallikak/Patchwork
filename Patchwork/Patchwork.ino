@@ -234,6 +234,8 @@ void checkEncoder()
       encpos = 0;
       encoder.write(0);
       enclongpress = true;
+      showTranspose(transpose);
+      resettoshowscale = millis() + 1000;
 #if DEBUG
     MSG("Cancelling transposition");
 #endif          
@@ -247,10 +249,10 @@ void checkEncoder()
 #if DEBUG
       DBG(transpose);
 #endif    
+      showTranspose(transpose);
+      resettoshowscale = millis() + 1000;
     }
     enclongpress = false;
-    showTranspose(transpose);
-    resettoshowscale = millis() + 1000;
   }
 }
 
