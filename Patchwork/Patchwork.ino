@@ -50,8 +50,13 @@ bool slowplay = true;
 bool slowdecay = true;
 bool buttonheld = false;
 int transpose = 0;
+
+int offsetup = 9;
+int offsetdown = 7;
+
 int melody = MID_NOTE;
-int chord[] = {MID_NOTE - 7, MID_NOTE, MID_NOTE + 9};  // define by the central note, then down a 5th and up a 6th
+int chord[] = {MID_NOTE - offsetdown, MID_NOTE, MID_NOTE + offsetup};  // define by the central note, then down a 5th and up a 6th
+int quantchord[] = {chord[0], chord[1], chord[2]};  // define by the central note, then down a 5th and up a 6th
 bool voice[] = {true, true, true, true};
 
 unsigned resettoshowscale = 0;
@@ -100,12 +105,12 @@ void sendAllNotesOff()
 int quantise(int n, tuning t, bool applytranspose)
 {
   // C C# D D# E F F# G G# A A# B 
-  // 0 1  2 3  4 5 6  7 8  9 10 11
-  // diatonic:     0 2 4 5 7 9 11
-  // diatonic_m:   0 2 3 5 7 8 11
-  // pentatonic:   0 2 5 7 9
-  // pentatonic_m: 0 3 5 7 10
-  // blues:        0 3 5 6 7 10
+  // 0 1  2 3  4 5 6  7 8  9 10 11  F C A
+  // diatonic:     0 2 4 5 7 9 11   F C A
+  // diatonic_m:   0 2 3 5 7 8 11   F C Ab
+  // pentatonic:   0 2 5 7 9        F C A
+  // pentatonic_m: 0 3 5 7 10       F C Bb
+  // blues:        0 3 5 6 7 10     F C Bb
 
   if (t == CHROMATIC)
     return applytranspose ? transpose + n : n;
@@ -357,6 +362,8 @@ void checkSwitch()
   if (direction.fallingEdge())
   {
     contrary = !contrary;
+    if (!contrary)
+      chord[0] = chord[1] - offsetdown;  // restore the parallel intervals
     showScale();
   }
 
@@ -374,8 +381,8 @@ void checkJoystick()
   }
   static int lastx = 512;
   static int lasty = 512;
-  int x = analogRead(X_AXIS);
-  int y = analogRead(Y_AXIS);
+  int x = 1023 - analogRead(X_AXIS);
+  int y = 1023 - analogRead(Y_AXIS);
   int decay = slowdecay ? SLOWDECAY : FASTDECAY;
   lastx = smoothpot(x, lastx, decay);
   lasty = smoothpot(y, lasty, decay);
@@ -399,26 +406,30 @@ void checkJoystick()
   if (n2 != chord[1])
   {
 #if DEBUG  
-  MSGn("Chord off: ")MSGn(chord[0])MSGn(" ")MSGn(chord[1])MSGn(" ")MSG(chord[2])
+  MSGn("Chord off: ")MSGn(quantchord[0])MSGn(" ")MSGn(quantchord[1])MSGn(" ")MSG(quantchord[2])
 #else
-    noteOff(chord[0]);
-    noteOff(chord[1]);
-    noteOff(chord[2]);
+    noteOff(quantchord[0]);
+    noteOff(quantchord[1]);
+    noteOff(quantchord[2]);
 #endif    
     int d = n2 - chord[1];
     chord[0] = contrary ? chord[0] - d : chord[0] + d;
     chord[1] += d;
     chord[2] += d;
+    quantchord[0] = quantise(chord[0], scale, true);
+    quantchord[1] = chord[1];
+    quantchord[2] = quantise(chord[2], scale, true);
+    
 #if DEBUG  
   MSGn("Chord on:  ")
-  if (voice[1]) { MSGn(chord[0])MSGn(" ") }
-  if (voice[2]) { MSGn(chord[1])MSGn(" ") }
-  if (voice[3]) { MSGn(chord[2]) }
+  if (voice[1]) { MSGn(quantchord[0])MSGn(" ") }
+  if (voice[2]) { MSGn(quantchord[1])MSGn(" ") }
+  if (voice[3]) { MSGn(quantchord[2]) }
   MSG("")
 #else  
-    if (voice[1]) noteOn(chord[0], CHORD_VELOCITY);
-    if (voice[2]) noteOn(chord[1], CHORD_VELOCITY);
-    if (voice[3]) noteOn(chord[2], CHORD_VELOCITY);
+    if (voice[1]) noteOn(quantchord[0], CHORD_VELOCITY);
+    if (voice[2]) noteOn(quantchord[1], CHORD_VELOCITY);
+    if (voice[3]) noteOn(quantchord[2], CHORD_VELOCITY);
 #endif 
     if (active)
     {
