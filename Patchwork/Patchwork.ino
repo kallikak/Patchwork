@@ -31,9 +31,9 @@ int CALIB_Y = 0;
 #define ENC_B 13
 #define ENC_SW 10
 
-#define RANGE    24   // 2 octaves
+#define RANGE    25   // 2 octaves + 1
 #define MID_NOTE 60   // middle C
-#define MIN_NOTE (MID_NOTE - RANGE)
+#define MIN_NOTE (MID_NOTE - RANGE + 1)
 #define MAX_NOTE (MID_NOTE + RANGE)
 
 #define MELODY_VELOCITY 100
@@ -41,8 +41,8 @@ int CALIB_Y = 0;
 
 #define FASTSTEP 40
 #define SLOWSTEP 120
-#define FASTDECAY 3
-#define SLOWDECAY 10
+#define FASTDECAY 2
+#define SLOWDECAY 6
 #define LONGPRESS 300
 
 typedef enum { CHROMATIC, DIATONIC_MAJOR, DIATONIC_MINOR, PENTATONIC_MAJOR, PENTATONIC_MINOR, BLUES, WHOLE_TONE } tuning;
@@ -54,9 +54,16 @@ bool slowplay = true;
 bool slowdecay = true;
 bool buttonheld = false;
 int transpose = 0;
+bool redoafterscalechange = false;
 
-int offsetup = 9;
-int offsetdown = 7;
+//int offsetup = 9;
+//int offsetdown = 7;
+int offsetup = 7;
+int offsetdown = 8;
+//int offsetup = 7;
+//int offsetdown = -16;
+//int offsetup = 7 - 12;
+//int offsetdown = -16 + 12;
 
 int melody = MID_NOTE;
 int chord[] = {MID_NOTE - offsetdown, MID_NOTE, MID_NOTE + offsetup};  // define by the central note, then down a 5th and up a 6th
@@ -150,7 +157,8 @@ int quantise(int n, tuning t, bool applytranspose)
     if (k == 1 || k == 4 || k == 6 || k == 9)
       n--;
     else if (k == 10)
-      n -= 2;
+      n++;
+//      n -= 2;
   }
   else if (t == PENTATONIC_MAJOR)
   {
@@ -161,7 +169,8 @@ int quantise(int n, tuning t, bool applytranspose)
         n--;
         break;
       case 4: case 11:
-        n -= 2;
+        n++;
+//        n -= 2;
         break;
     }
   }
@@ -174,7 +183,8 @@ int quantise(int n, tuning t, bool applytranspose)
         n--;
         break;
       case 2: case 9:
-        n -= 2;
+        n++;
+//        n -= 2;
         break;
     }
   }
@@ -187,7 +197,8 @@ int quantise(int n, tuning t, bool applytranspose)
         n--;
         break;
       case 2: case 9:
-        n -= 2;
+        n++;
+//        n -= 2;
         break;
     }
   }
@@ -361,6 +372,7 @@ void checkSwitch()
       scale = scale + 1;
       if (scale > WHOLE_TONE)
         scale = CHROMATIC;
+      redoafterscalechange = true;
       showScale();
 #if DEBUG
       MSGn("press: ")DBG(scale)
@@ -449,8 +461,19 @@ void checkJoystick()
     lasty = 512;
   int n1 = quantise(map(round(lastx), 0, 1023, MIN_NOTE, MAX_NOTE), scale, true);
   int n2 = quantise(map(round(lasty), 0, 1023, MIN_NOTE, MAX_NOTE), scale, true);
-  if (n1 != melody)
+
+  bool newnote = n1 != melody;
+  bool newchord = n2 != chord[1];
+  if (redoafterscalechange && (newnote || newchord))
   {
+    // if scale has changed and either needs playing, redo both
+    newnote = true;
+    newchord = true;
+  }
+  
+  if (newnote)
+  {
+    redoafterscalechange = false;
 #if DEBUG  
     if (voice[0]) { MSGn("Melody: ")MSGn(n1)MSGn(" ")MSG(notestring(n1)) }
 #else  
@@ -464,7 +487,7 @@ void checkJoystick()
       pixels.show();
     }
   }
-  if (n2 != chord[1])
+  if (newchord)
   {
 #if DEBUG  
   MSGn("Chord off: ")MSGn(quantchord[0])MSGn(" ")MSGn(quantchord[1])MSGn(" ")MSG(quantchord[2])
