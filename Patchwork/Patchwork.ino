@@ -31,7 +31,7 @@ int CALIB_Y = 0;
 #define ENC_B 13
 #define ENC_SW 10
 
-#define RANGE    36   // 3 octaves
+#define RANGE    24   // 2 octaves
 #define MID_NOTE 60   // middle C
 #define MIN_NOTE (MID_NOTE - RANGE)
 #define MAX_NOTE (MID_NOTE + RANGE)
