@@ -24,13 +24,17 @@ const int DIP_PIN[] = {6, 5, 4, 3};
 #define DIRECTION 7
 #define ENABLE 12
 
+int CALIB_X = 0;
+int CALIB_Y = 0;
+
 #define ENC_A 9
 #define ENC_B 13
 #define ENC_SW 10
 
-#define MIN_NOTE 36
-#define MAX_NOTE 102
-#define MID_NOTE ((MIN_NOTE + MAX_NOTE) >> 1)
+#define RANGE    36   // 3 octaves
+#define MID_NOTE 60   // middle C
+#define MIN_NOTE (MID_NOTE - RANGE)
+#define MAX_NOTE (MID_NOTE + RANGE)
 
 #define MELODY_VELOCITY 100
 #define CHORD_VELOCITY 70
@@ -41,7 +45,7 @@ const int DIP_PIN[] = {6, 5, 4, 3};
 #define SLOWDECAY 10
 #define LONGPRESS 300
 
-typedef enum { CHROMATIC, DIATONIC_MAJOR, DIATONIC_MINOR, PENTATONIC_MAJOR, PENTATONIC_MINOR, BLUES } tuning;
+typedef enum { CHROMATIC, DIATONIC_MAJOR, DIATONIC_MINOR, PENTATONIC_MAJOR, PENTATONIC_MINOR, BLUES, WHOLE_TONE } tuning;
 
 tuning scale = CHROMATIC;
 bool active = false;
@@ -64,7 +68,8 @@ unsigned resettoshowscale = 0;
 #include <Adafruit_NeoPixel.h>
 
 #define NUMPIXELS 8
-#define SCALEPIXELS 6
+#define SCALEPIXELS 5
+#define TRANSPIXELS 6
 #define PIXELPIN 11
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIXELPIN, NEO_GRB + NEO_KHZ800);
@@ -75,6 +80,21 @@ Bounce direction = Bounce(DIRECTION, 50);
 Bounce dipsw[] = { Bounce(DIP_PIN[0], 50), Bounce(DIP_PIN[1], 50), Bounce(DIP_PIN[2], 50), Bounce(DIP_PIN[3], 50) };
 Encoder encoder = Encoder(ENC_A, ENC_B);
 Bounce encoder_sw = Bounce(ENC_SW, 50);
+
+#if DEBUG
+static char tempnotestr[10] = {0};
+const char *notestring(int k)
+{
+  static const char* notes[] = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
+
+  k -= 20;
+  int i = (k + 11) % 12;
+  if (i < 0)
+    return "-";
+  sprintf(tempnotestr, "%s%d", notes[(k + 11) % 12], (int)floor((k + 8) / 12));
+  return tempnotestr;
+}
+#endif
 
 void noteOn(byte pitch, byte velocity)
 {
@@ -108,6 +128,7 @@ int quantise(int n, tuning t, bool applytranspose)
   // 0 1  2 3  4 5 6  7 8  9 10 11  F C A
   // diatonic:     0 2 4 5 7 9 11   F C A
   // diatonic_m:   0 2 3 5 7 8 11   F C Ab
+  // wholetone:    0 2 4 6 8 10     F# C A#
   // pentatonic:   0 2 5 7 9        F C A
   // pentatonic_m: 0 3 5 7 10       F C Bb
   // blues:        0 3 5 6 7 10     F C Bb
@@ -115,7 +136,8 @@ int quantise(int n, tuning t, bool applytranspose)
   if (t == CHROMATIC)
     return applytranspose ? transpose + n : n;
 
-  int k = (144 + n + 8) % 12;   
+  // middle note 60 is C, so let's make sure we get k = 0 for C in whatever octave
+  int k = (144 + n - 60) % 12;
   if (t == DIATONIC_MAJOR)
   {
     // if sharp/flat then drop a semitone
@@ -169,23 +191,23 @@ int quantise(int n, tuning t, bool applytranspose)
         break;
     }
   }
+  else if (t == WHOLE_TONE)
+  {
+    if (k & 0x01)
+      n--; 
+  }
 
   return applytranspose ? n + transpose : n;
-}
-
-int smoothpot(int newvalue, int curvalue, int n)
-{
-  return floor(((n - 1) * curvalue + newvalue) / n);
 }
 
 void showTranspose(int d)
 {
   bool down = d < 0;
   d = abs(d);
-  for (int i = 0; i < SCALEPIXELS; ++i)
+  for (int i = 0; i < TRANSPIXELS; ++i)
   {
     int j = 2 * i + 1;
-    int k = 2 * (SCALEPIXELS - i) - 1;
+    int k = 2 * (TRANSPIXELS - i) - 1;
     bool on = down ? d >= k : d >= j;
     bool half = down ? d == k : d == j;
     if (on)
@@ -203,12 +225,39 @@ void showTranspose(int d)
 
 void showScale()
 {
+  int k;
+  bool minor = (scale == DIATONIC_MINOR) || (scale == PENTATONIC_MINOR);
+  switch (scale)
+  {
+    case CHROMATIC:
+    default:
+      k = 0;
+      break;
+    case DIATONIC_MAJOR:
+    case DIATONIC_MINOR:
+      k = 1;
+      break;
+    case PENTATONIC_MAJOR:
+    case PENTATONIC_MINOR:
+      k = 2;
+      break;
+    case BLUES:
+      k = 3;
+      break;
+    case WHOLE_TONE:
+      k = 4;
+      break;
+  }
   for (int i = 0; i < SCALEPIXELS; ++i)
   {
     if (contrary)
-      pixels.setPixelColor(i, pixels.Color(i <= scale ? 0 : 50, 0, i <= scale ? 50 : 0));
+    {
+      pixels.setPixelColor(i, pixels.Color(i <= k ? (minor ? 50 : 0) : 50, 0, i <= k ? 50 : 0));
+    }
     else
-      pixels.setPixelColor(i, pixels.Color(i <= scale ? 0 : 50, i <= scale ? 50 : 0, 0));
+    {
+      pixels.setPixelColor(i, pixels.Color(i <= k ? (minor ? 50 : 0) : 50, i <= k ? 50 : 0, 0));
+    }
   }
   pixels.show();
 }
@@ -310,7 +359,7 @@ void checkSwitch()
     if (joystick.previousDuration() < LONGPRESS)
     {
       scale = scale + 1;
-      if (scale > BLUES)
+      if (scale > WHOLE_TONE)
         scale = CHROMATIC;
       showScale();
 #if DEBUG
@@ -336,6 +385,7 @@ void checkSwitch()
 #endif
     if (active)
     {
+      pixels.setPixelColor(5, pixels.Color(50, 50, 50));
       pixels.setPixelColor(6, pixels.Color(50, 50, 50));
       pixels.setPixelColor(7, pixels.Color(50, 50, 50));
       pixels.show();
@@ -354,6 +404,7 @@ void checkSwitch()
 //      noteOff(chord[2]);
       sendAllNotesOff();  // ensure all off
 #endif      
+      pixels.setPixelColor(5, pixels.Color(0, 0, 0));
       pixels.setPixelColor(6, pixels.Color(0, 0, 0));
       pixels.setPixelColor(7, pixels.Color(0, 0, 0));
       pixels.show();
@@ -370,6 +421,11 @@ void checkSwitch()
   checkDIPswitches();
 }
 
+float smoothpot(int newvalue, float curvalue, int n)
+{
+  return ((n - 1) * curvalue + newvalue) / n;
+}
+
 void checkJoystick()
 {
   if (buttonheld)
@@ -379,19 +435,24 @@ void checkJoystick()
 #endif
     return; // don't play new notes
   }
-  static int lastx = 512;
-  static int lasty = 512;
-  int x = 1023 - analogRead(X_AXIS);
-  int y = 1023 - analogRead(Y_AXIS);
+  static float lastx = 512;
+  static float lasty = 512;
+  int x = 1023 - analogRead(X_AXIS) - CALIB_X;
+  int y = 1023 - analogRead(Y_AXIS) - CALIB_Y;
   int decay = slowdecay ? SLOWDECAY : FASTDECAY;
   lastx = smoothpot(x, lastx, decay);
   lasty = smoothpot(y, lasty, decay);
-  int n1 = quantise(map(lastx, 0, 1023, MIN_NOTE, MAX_NOTE), scale, true);
-  int n2 = quantise(map(lasty, 0, 1023, MIN_NOTE, MAX_NOTE), scale, true);
+  // make the middle note stickier
+  if (abs(lastx - 512) < 1)
+    lastx = 512;
+  if (abs(lasty - 512) < 1)
+    lasty = 512;
+  int n1 = quantise(map(round(lastx), 0, 1023, MIN_NOTE, MAX_NOTE), scale, true);
+  int n2 = quantise(map(round(lasty), 0, 1023, MIN_NOTE, MAX_NOTE), scale, true);
   if (n1 != melody)
   {
 #if DEBUG  
-    if (voice[0]) { MSGn("Melody: ")MSG(n1) }
+    if (voice[0]) { MSGn("Melody: ")MSGn(n1)MSGn(" ")MSG(notestring(n1)) }
 #else  
     noteOff(melody);
     if (voice[0]) noteOn(n1, MELODY_VELOCITY);
@@ -399,7 +460,7 @@ void checkJoystick()
     melody = n1;
     if (active)
     {
-      pixels.setPixelColor(6, pixels.Color(random(5) * 10, random(5) * 10, random(5) * 10));
+      pixels.setPixelColor(5, pixels.Color(random(5) * 10, random(5) * 10, random(5) * 10));
       pixels.show();
     }
   }
@@ -407,6 +468,7 @@ void checkJoystick()
   {
 #if DEBUG  
   MSGn("Chord off: ")MSGn(quantchord[0])MSGn(" ")MSGn(quantchord[1])MSGn(" ")MSG(quantchord[2])
+  MSGn(n2)MSGn(" ")MSG(notestring(n2))
 #else
     noteOff(quantchord[0]);
     noteOff(quantchord[1]);
@@ -433,10 +495,26 @@ void checkJoystick()
 #endif 
     if (active)
     {
+      pixels.setPixelColor(6, pixels.Color(random(5) * 10, random(5) * 10, random(5) * 10));
       pixels.setPixelColor(7, pixels.Color(random(5) * 10, random(5) * 10, random(5) * 10));
       pixels.show();
     }   
   }
+}
+
+void calibrate()
+{
+  int n = 10;
+  for (int i = 0; i < n; ++i)
+  {
+    CALIB_X += 1023 - analogRead(X_AXIS) - 512;
+    CALIB_Y += 1023 - analogRead(Y_AXIS) - 512;  
+    delay(20);
+  }
+  CALIB_X /= n;
+  CALIB_Y /= n;
+  DBGn(CALIB_X)DBG(CALIB_Y)
+  delay(1000);
 }
 
 void setup() 
@@ -448,14 +526,10 @@ void setup()
   //  Set MIDI baud rate:
   Serial.begin(31250);
 #endif
-  delay(200);
-
-#if !DEBUG
-  sendAllNotesOff();
-#endif
 
   pinMode(X_AXIS, INPUT);
   pinMode(Y_AXIS, INPUT);
+  calibrate();
   pinMode(SWITCH, INPUT_PULLUP);
   pinMode(ENABLE, INPUT_PULLUP);
   pinMode(DIRECTION, INPUT_PULLUP);
@@ -471,6 +545,10 @@ void setup()
   pinMode(ENC_A, INPUT_PULLUP);
   pinMode(ENC_B, INPUT_PULLUP);
   pinMode(ENC_SW, INPUT_PULLUP);
+
+#if !DEBUG
+  sendAllNotesOff();
+#endif
 
 #if DEBUG
   for (int i = 0; i < 4; ++i)
@@ -498,6 +576,7 @@ void loop()
   if (resettoshowscale > 0 && resettoshowscale <= now)
   {
     resettoshowscale = 0;
+    pixels.setPixelColor(5, 0, 0, 0);
     showScale();
   }
 }
