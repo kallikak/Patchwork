@@ -391,10 +391,10 @@ void checkSwitch()
       pixels.show();
 #if !DEBUG      
       sendAllNotesOff();  // start clean
-      if (voice[0]) noteOn(melody, MELODY_VELOCITY);
-      if (voice[1]) noteOn(chord[0], CHORD_VELOCITY);
-      if (voice[2]) noteOn(chord[1], CHORD_VELOCITY);
-      if (voice[3]) noteOn(chord[2], CHORD_VELOCITY);
+//      if (voice[0]) noteOn(melody, MELODY_VELOCITY);
+//      if (voice[1]) noteOn(chord[0], CHORD_VELOCITY);
+//      if (voice[2]) noteOn(chord[1], CHORD_VELOCITY);
+//      if (voice[3]) noteOn(chord[2], CHORD_VELOCITY);
 #endif      
     } else {
 #if !DEBUG      
