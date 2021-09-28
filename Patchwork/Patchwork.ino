@@ -237,7 +237,7 @@ void showTranspose(int d)
 void showScale()
 {
   int k;
-  bool minor = (scale == DIATONIC_MINOR) || (scale == PENTATONIC_MINOR);
+  bool minor = (scale == DIATONIC_MINOR) || (scale == PENTATONIC_MINOR) || (scale == BLUES);
   switch (scale)
   {
     case CHROMATIC:
