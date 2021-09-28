@@ -26,7 +26,8 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
   - Pentatonic major
   - Pentatonic minor 
   - Blues
-- The first 6 Neopixel LEDs indicate the active quantisation. (The other two just flash random colours when new notes are played.)
+  - Whole tone
+- The first 5 Neopixel LEDs indicate the active quantisation. (The others just flash random colours when new notes are played.)
 - Holding the joystick button down while moving will prevent new notes being sent.
 - The encoder allows transposition of the output notes:
   - Rotate to choose a transposition interval
