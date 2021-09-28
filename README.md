@@ -18,7 +18,6 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
 ## Controls
 
 - Hitting the *Enable* button toggles the sending of MIDI note-on messages.
-- Hitting the *Direction* button toggles between the harmony notes all moving in parallel, or the lower note moving contrary to the others.
 - Clicking the joystick changes the quantisation between:
   - Chromatic
   - Diatonic major
@@ -27,7 +26,15 @@ Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to s
   - Pentatonic minor 
   - Blues
   - Whole tone
-- The first 5 Neopixel LEDs indicate the active quantisation. (The others just flash random colours when new notes are played.)
+- The first 5 Neopixel LEDs indicate the active quantisation
+  - 1 LED = chromatic
+  - 2 LEDs = diatonic
+  - 3 LEDs = pentatonic
+  - 4 LEDs = blues
+  - 5 LEDS = whole tone 
+  - Minor scales are indicated by a change of colour
+ - The remaining LEDs flash random colours when new notes are played.
+- Hitting the *Direction* button toggles between the harmony notes all moving in parallel, or the lower note moving contrary to the others. The active setting is shown by the colour used for the quantisation LEDs.
 - Holding the joystick button down while moving will prevent new notes being sent.
 - The encoder allows transposition of the output notes:
   - Rotate to choose a transposition interval
