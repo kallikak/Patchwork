@@ -13,7 +13,7 @@ Here is a <a href="Thumb Blues Improvisation.mp4" alt="Video demo">brief video</
 
 ## Basic use
 
-Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to start playing.  Moving the joystick along the x-axis plays a single note with pitch determined by the x position. Moving along the y-axis plays a chord made up of a central note with pitch determined by the y position, plus two additional notes - a 5th down and a sixth up.
+Connect the DIN5 MIDI out socket to a MIDI device and hit the Enable button to start playing.  Moving the joystick along the x-axis plays a single note with pitch determined by the x position. Moving along the y-axis plays a chord made up of a central note with pitch determined by the y position, plus two additional notes (by default a 5th up and a minor sixth down, but easy to change in the code if desired).
 
 ## Controls
 
