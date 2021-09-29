@@ -9,7 +9,7 @@ Joystick MIDI controller inspired by Laurie Spiegel's Music Mouse, and named aft
   </tr>  
 </table>
 
-Here is a <a href="Thumb Blues Improvisation.mp4" alt="Video demo">brief video</a> showing it in action.
+Here is a <a href="https://youtu.be/ERIJVWJXHjc" alt="Video demo">brief video</a> showing it in action.
 
 ## Basic use
 
